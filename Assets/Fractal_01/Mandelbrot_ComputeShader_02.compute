@@ -1,0 +1,78 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel Mandelbrot
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWTexture2D<float4> Result;
+
+
+float width;
+float height;
+
+float img_real;
+float img_imag;
+
+float pixel_size;
+
+int iterations_per_group;
+int num_groups;
+Texture2D<float4> gradient_texture;
+
+
+uint Mnadelbrot_iterations(double c_real, double c_imag, uint max_iter)
+{
+    double z_real = 0;
+    double z_imag = 0;
+    
+    double zr_squared = 0;
+    double zi_squared = 0;
+    
+    uint iter;
+    
+    for (iter = 0; iter < max_iter; iter++)
+    {
+        // z = z^2 + c
+        // (a + ib) (c + ib) = (ac - bd) + i(ad + bc)
+        // z*z: (zr + i zi) (zr + i zi) = (zr*zr - zi*zi) + i(2 * (zr * zi))
+        
+        //imag: 2 * (zr * zi)
+        z_imag = z_real * z_imag; 
+        z_imag += z_imag; //*2
+        z_imag += c_imag; //+c
+        
+        //real: (zr*zr - zi*zi)
+        z_real = (zr_squared - zi_squared) + c_real;
+        
+        zr_squared = z_real * z_real;
+        zi_squared = z_imag * z_imag;
+        
+        if (zr_squared + zi_squared > 4.0) // sqrt(real^2 + imag^2) <= 2
+        {
+            break;
+        }
+    }
+    
+    
+        return iter;
+}
+
+[numthreads(32, 32, 1)]
+void Mandelbrot(uint3 id : SV_DispatchThreadID)
+{
+    double offset_real = ((double)id.x - (width / 2)) * pixel_size;
+    double offset_imag = ((double)id.y - (height / 2)) * pixel_size;
+    
+    double real = img_real + offset_real;
+    double imag = img_imag + offset_imag;
+    
+    uint total_iterations = iterations_per_group * num_groups;
+    uint iteration_for_exclusion = Mnadelbrot_iterations(real, imag, total_iterations);
+    
+    uint gradient_pos = iteration_for_exclusion % iterations_per_group;
+    uint is_odd_group = (iteration_for_exclusion / iterations_per_group) % 2;
+    gradient_pos = is_odd_group ? iterations_per_group - gradient_pos : gradient_pos;
+    
+    gradient_pos = (iteration_for_exclusion == total_iterations) ? 0 : gradient_pos;
+    
+    Result[id.xy] = gradient_texture.Load(int3(gradient_pos, 0, 0));
+}
