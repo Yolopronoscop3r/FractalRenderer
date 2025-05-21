@@ -9,8 +9,9 @@ RWTexture2D<float4> Result;
 float width;
 float height;
 
-float img_real;
-float img_imag;
+// High precision coordinate representation using two floats per coordinate
+float4 img_real_parts; // x: main part, y: remainder
+float4 img_imag_parts; // x: main part, y: remainder
 
 float pixel_size;
 
@@ -18,6 +19,11 @@ int iterations_per_group;
 int num_groups;
 Texture2D<float4> gradient_texture;
 
+// Helper function to combine the high-precision parts
+double CombineDoubleParts(float4 parts) 
+{
+    return (double)parts.x + (double)parts.y;
+}
 
 uint Mnadelbrot_iterations(double c_real, double c_imag, uint max_iter)
 {
@@ -62,8 +68,9 @@ void Mandelbrot(uint3 id : SV_DispatchThreadID)
     double offset_real = ((double)id.x - (width / 2)) * pixel_size;
     double offset_imag = ((double)id.y - (height / 2)) * pixel_size;
     
-    double real = img_real + offset_real;
-    double imag = img_imag + offset_imag;
+    // Reconstruct high-precision coordinates from parts
+    double real = CombineDoubleParts(img_real_parts) + offset_real;
+    double imag = CombineDoubleParts(img_imag_parts) + offset_imag;
     
     uint total_iterations = iterations_per_group * num_groups;
     uint iteration_for_exclusion = Mnadelbrot_iterations(real, imag, total_iterations);

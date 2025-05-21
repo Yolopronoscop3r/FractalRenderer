@@ -56,8 +56,18 @@ public class Mandelbrot_02 : MonoBehaviour
         shader.SetFloat("width", width);
         shader.SetFloat("height", height);
 
-        shader.SetFloat("img_real", (float)img_real);
-        shader.SetFloat("img_imag", (float)img_imag);
+        Vector4 realParts = new Vector4(
+            (float)img_real, 
+            (float)(img_real - (float)img_real), 
+            0, 0);
+        
+        Vector4 imagParts = new Vector4(
+            (float)img_imag, 
+            (float)(img_imag - (float)img_imag),
+            0, 0);
+
+        shader.SetVector("img_real_parts", realParts);
+        shader.SetVector("img_imag_parts", imagParts);
         shader.SetFloat("pixel_size", (float)pixel_size);
         
         shader.SetInt("iterations_per_group", iterationsPerGroup);
