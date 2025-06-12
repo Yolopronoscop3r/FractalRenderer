@@ -1,0 +1,110 @@
+#pragma kernel Newton
+
+RWTexture2D<float4> Result;
+Texture2D<float4> gradientTexture;
+
+uint width;
+uint height;
+int maxIterations;
+bool useBasins;
+float epsilon;
+
+float2 img_real_parts;
+float2 img_imag_parts;
+float2 pixel_size_parts;
+
+// Z^3 - 1 = 0 -> 3 pierwiastki
+float2 roots[3] =
+{
+    float2(1.0, 0.0),
+    float2(-0.5, 0.8660254),
+    float2(-0.5, -0.8660254)
+};
+
+double CombineDouble(float2 parts)
+{
+    return (double) parts.x + (double) parts.y;
+}
+
+double2 ComplexMul(double2 a, double2 b)
+{
+    return double2(
+        a.x * b.x - a.y * b.y,
+        a.x * b.y + a.y * b.x
+    );
+}
+
+double2 ComplexDiv(double2 a, double2 b)
+{
+    double d = b.x * b.x + b.y * b.y;
+    return double2(
+        (a.x * b.x + a.y * b.y) / d,
+        (a.y * b.x - a.x * b.y) / d
+    );
+}
+
+[numthreads(8, 8, 1)]
+void Newton(uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= width || id.y >= height)
+        return;
+
+    double pixel_size = CombineDouble(pixel_size_parts);
+    double2 origin = double2(CombineDouble(img_real_parts), CombineDouble(img_imag_parts));
+
+    double2 z0;
+    z0.x = origin.x + ((double) id.x - width / 2) * pixel_size;
+    z0.y = origin.y + ((double) id.y - height / 2) * pixel_size;
+
+    double2 z = z0;
+    int i;
+
+    for (i = 0; i < maxIterations; i++)
+    {
+        double2 p = ComplexMul(z, ComplexMul(z, z)); // z^3
+        p.x -= 1.0;
+
+        double2 dp = ComplexMul(z, z); // 3z^2
+        dp.x *= 3;
+        dp.y *= 3;
+
+        double2 dz = ComplexDiv(p, dp);
+        double2 zn = z - dz;
+
+        double dist = abs(length(double2(zn.x - z.x, zn.y - z.y)));
+        z = zn;
+
+        if (dist < epsilon)
+            break;
+    }
+
+    float4 color;
+
+    if (useBasins)
+    {
+        int rootIndex = 3;
+        for (int r = 0; r < 3; r++)
+        {
+            float2 root = roots[r];
+            float dx = (float) z.x - root.x;
+            float dy = (float) z.y - root.y;
+            if (dx * dx + dy * dy < epsilon * epsilon)
+            {
+                rootIndex = r;
+                break;
+            }
+        }
+
+        color = (rootIndex == 0) ? float4(1, 0, 0, 1) :
+                (rootIndex == 1) ? float4(0, 1, 0, 1) :
+                (rootIndex == 2) ? float4(0, 0.7, 1, 1) :
+                                   float4(0, 0, 0, 1);
+    }
+    else
+    {
+        float t = (float) i / (float) maxIterations;
+        color = gradientTexture.Load(int3((int) (t * 255), 0, 0));
+    }
+
+    Result[id.xy] = color;
+}

@@ -1,0 +1,74 @@
+#pragma kernel Julia
+
+RWTexture2D<float4> Result;
+
+float2 img_real_parts;
+float2 img_imag_parts;
+float2 pixel_size_parts;
+float2 power_parts;
+float2 screen_width_parts;
+float2 screen_height_parts;
+
+float2 shift_horizontal;
+float2 shift_vertical;
+
+int iterations_per_group;
+int num_groups;
+Texture2D<float4> gradient_texture;
+
+double CombineDoubleParts(float2 parts)
+{
+    return (double) parts.x + (double) parts.y;
+}
+
+uint Julia_iterations(double z_real_init, double z_imag_init, uint max_iter)
+{
+    // Dla zbioru Julii: z = z^d + c, gdzie c = stala wartosc przekazywana z .cs jako img_real/img_imag
+    double2 z = double2(z_real_init, z_imag_init);
+    double2 c = double2(CombineDoubleParts(img_real_parts), CombineDoubleParts(img_imag_parts));
+    double d = CombineDoubleParts(power_parts);
+
+    for (uint iter = 0; iter < max_iter; iter++)
+    {
+        double r = sqrt(z.x * z.x + z.y * z.y);
+
+        if (r > 2.0)
+        {
+            return iter;
+        }
+
+        double a = d * atan2(z.y, z.x);
+        double pow_r = pow(r, d);
+        z = pow_r * double2(cos(a), sin(a)) + c;
+    }
+
+    return max_iter;
+}
+
+[numthreads(32, 32, 1)]
+void Julia(uint3 id : SV_DispatchThreadID)
+{
+    double width = CombineDoubleParts(screen_width_parts);
+    double height = CombineDoubleParts(screen_height_parts);
+    double pixel_size = CombineDoubleParts(pixel_size_parts);
+    
+    double horizontal = CombineDoubleParts(shift_horizontal);
+    double vertical = CombineDoubleParts(shift_vertical);
+
+    double offset_imag = ((double) id.x - width * 0.5) * pixel_size + horizontal;
+    double offset_real = ((double) id.y - height * 0.5) * pixel_size + vertical;
+
+    double real = offset_real;
+    double imag = offset_imag;
+
+    uint total_iterations = iterations_per_group * num_groups;
+    uint iter_count = Julia_iterations(real, imag, total_iterations);
+
+    uint gradient_pos = iter_count % iterations_per_group;
+    uint is_odd_group = (iter_count / iterations_per_group) % 2;
+    gradient_pos = is_odd_group ? iterations_per_group - gradient_pos : gradient_pos;
+
+    gradient_pos = (iter_count == total_iterations) ? 0 : gradient_pos;
+
+    Result[id.xy] = gradient_texture.Load(int3(gradient_pos, 0, 0));
+}

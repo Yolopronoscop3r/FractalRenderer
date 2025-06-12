@@ -30,25 +30,29 @@ uint Mnadelbrot_iterations(double c_real, double c_imag, uint max_iter)
     double z_real = 0;
     double z_imag = 0;
     
-    //double zr_squared = 0;
-    //double zi_squared = 0;
-    
-    double2 p = double2(c_real, c_imag);
-    double2 z = p;
-    double d = CombineDoubleParts(power_parts);
+    double zr_squared = 0;
+    double zi_squared = 0;
 
     for (uint iter = 0; iter < max_iter; iter++)
-    {
-        double r = sqrt(z.x * z.x + z.y * z.y);
-
-        if (r > 2.0)
+    { 
+        // z = z^2 + c
+        // (a + ib) (c + ib) = (ac - bd) + i(ad + bc)
+        // z*z: (zr + i zi) (zr + i zi) = (zr*zr - zi*zi) + i(2 * (zr * zi))
+        //imag: 2 * (zr * zi)
+        z_imag = z_real * z_imag;
+        z_imag += z_imag; //*2
+        z_imag += c_imag; //+c
+        
+        //real: (zr * zr - zi * zi)
+        z_real = (zr_squared - zi_squared) + c_real;
+        
+        zr_squared = z_real * z_real;
+        zi_squared = z_imag * z_imag;
+        
+        if (zr_squared + zi_squared > 4.0) // sqrt(real^2 + imag^2) <= 2
         {
-            return iter;
+            break;
         }
-
-        double a = d * atan2(z.y, z.x);
-        double pow_r = pow(r, d);
-        z = pow_r * double2(cos(a), sin(a)) + p;
     }
     
     return iter;

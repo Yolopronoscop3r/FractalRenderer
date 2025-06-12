@@ -1,7 +1,6 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
-public class Mandelbrot_02 : MonoBehaviour
+public class Julia_01 : MonoBehaviour
 {
     [SerializeField] private ComputeShader shader;
 
@@ -12,10 +11,12 @@ public class Mandelbrot_02 : MonoBehaviour
     [Header("Image position")]
     [SerializeField] private double img_real = 0.0;
     [SerializeField] private double img_imag = 0.0;
+    [SerializeField] private double shift_horizontal = 0.0;
+    [SerializeField] private double shift_verical = 0.0;
     [SerializeField] private double pixel_size = 4.0 / Screen.height;
 
     [Header("Fractal power")]
-    [SerializeField] private float power = 3.5f;
+    [SerializeField] private float power = 2.0f;
 
     [Header("Colour setup")]
     [Range(1, 256)]
@@ -25,7 +26,6 @@ public class Mandelbrot_02 : MonoBehaviour
 
     [SerializeField] private Gradient gradient;
     private Texture2D gradientTexture;
-
 
     private void UpdateGradient()
     {
@@ -58,7 +58,7 @@ public class Mandelbrot_02 : MonoBehaviour
         }
         UpdateGradient();
 
-        int kernelHandle = shader.FindKernel("Mandelbrot");
+        int kernelHandle = shader.FindKernel("Julia");
         shader.SetTexture(kernelHandle, "Result", renderTexture);
 
         Vector2 realParts = new(
@@ -67,6 +67,12 @@ public class Mandelbrot_02 : MonoBehaviour
         Vector2 imagParts = new(
             (float)img_imag,
             (float)(img_imag - (float)img_imag));
+        Vector2 shiftHorizontalParts = new(
+            (float)shift_horizontal,
+            (float)shift_horizontal - (float)shift_horizontal);
+        Vector2 shiftVericalParts = new(
+            (float)shift_verical,
+            (float)shift_verical - (float)shift_verical);
         Vector2 widthParts = new(
             (float)Screen.width,
             (float)(Screen.width - (float)Screen.width));
@@ -80,12 +86,16 @@ public class Mandelbrot_02 : MonoBehaviour
             (float)power,
             (float)(power - (float)power));
 
+
         shader.SetVector("img_real_parts", realParts);
         shader.SetVector("img_imag_parts", imagParts);
         shader.SetVector("screen_width_parts", widthParts);
         shader.SetVector("screen_height_parts", heightParts);
         shader.SetVector("pixel_size_parts", pixelSizeParts);
         shader.SetVector("power_parts", powerParts);
+
+        shader.SetVector("shift_horizontal", shiftHorizontalParts);
+        shader.SetVector("shift_vertical", shiftVericalParts);
 
 
         shader.SetInt("iterations_per_group", iterationsPerGroup);
@@ -111,10 +121,15 @@ public class Mandelbrot_02 : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A)) { Move(-1, 0); }
-        if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D)) { Move(1, 0); }
-        if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W)) { Move(0, 1); }
-        if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S)) { Move(0, -1); }
+        if (Input.GetKey(KeyCode.A)) { Shift(-1, 0); }   
+        if (Input.GetKey(KeyCode.D)) { Shift(1, 0); }
+        if (Input.GetKey(KeyCode.W)) { Shift(0, 1); }
+        if (Input.GetKey(KeyCode.S)) { Shift(0, -1); }
+
+        if (Input.GetKey(KeyCode.LeftArrow)) { Move(-1, 0); }
+        if (Input.GetKey(KeyCode.RightArrow)) { Move(1, 0); }
+        if (Input.GetKey(KeyCode.UpArrow)) { Move(0, 1); }
+        if (Input.GetKey(KeyCode.DownArrow)) { Move(0, -1); }
 
         if (Input.GetKey(KeyCode.Q)) { Zoom(-1); }
         if (Input.GetKey(KeyCode.E)) { Zoom(1); }
@@ -130,10 +145,12 @@ public class Mandelbrot_02 : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.R))
         {
-            img_real = 0.0;
-            img_imag = 0.0;
+            img_real = 0.2744;
+            img_imag = 0.0057;
+            shift_horizontal = 0.0;
+            shift_verical = 0.0;
             pixel_size = 4.0 / Screen.height;
-            power = 3.5f;
+            power = 2.0f;
             iterationsPerGroup = 64;
             numGroups = 1;
             needsUpdate = true;
@@ -149,6 +166,7 @@ public class Mandelbrot_02 : MonoBehaviour
         iterationsPerGroup = Mathf.Clamp(Mathf.RoundToInt(newValue), 1, 256);
         needsUpdate = true;
     }
+
     private void NumGroups(int value)
     {
         int modifire = IsShift() ? 1 : 2;
@@ -156,34 +174,48 @@ public class Mandelbrot_02 : MonoBehaviour
         numGroups = Mathf.Clamp(newValue, 1, 10);
         needsUpdate = true;
     }
+
     private void Power(float pow)
     {
-        float modifier = IsShift() ? 0.125f : 1f;
+        float modifier = IsShift() ? 0.2f : 1f;
         float delta = pow * Time.deltaTime * modifier * 2;
 
         power += delta;
 
         needsUpdate = true;
     }
+
+    private void Shift(double horizontal, double verical)
+    {
+        double shiftSpeed = Screen.height / 32;
+        double modifire = IsShift() ? 0.2f : 1.0f;
+        double shiftAmount = shiftSpeed * pixel_size * Time.deltaTime * 8 * modifire;
+
+        shift_horizontal += horizontal * shiftAmount;
+        shift_verical += verical * shiftAmount;
+
+        needsUpdate = true;
+    }
+
     private void Move(double real, double imag)
     {
-        double moveSpeed = Screen.height / 2;
-        double modifier = IsShift() ? 0.2 : 1.0;
-        double moveAmount = moveSpeed * pixel_size * Time.deltaTime * 3 * modifier;
+        double moveSpeed = Screen.height / 32;
+        double modifier = IsShift() ? 0.1f : 1.0f;
+        double moveAmount = moveSpeed * pixel_size * Time.deltaTime * 4 * modifier;  
 
         img_real += real * moveAmount;
         img_imag += imag * moveAmount;
 
         needsUpdate = true;
     }
+
     private void Zoom(int direction)
     {
-        float modifier = IsShift() ? 0.2f : 1f;
+        float modifier = IsShift() ? 0.15f : 1f;
         double delta = direction * pixel_size * Time.deltaTime * 4 * modifier;
 
         pixel_size += delta;
 
         needsUpdate = true;
     }
-
 }

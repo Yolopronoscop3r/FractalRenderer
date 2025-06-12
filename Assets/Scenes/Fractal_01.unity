@@ -132,8 +132,11 @@ GameObject:
   m_Component:
   - component: {fileID: 1958448851}
   - component: {fileID: 1958448850}
-  - component: {fileID: 1958448849}
+  - component: {fileID: 1958448855}
+  - component: {fileID: 1958448853}
   - component: {fileID: 1958448852}
+  - component: {fileID: 1958448854}
+  - component: {fileID: 1958448856}
   m_Layer: 0
   m_Name: Camera
   m_TagString: Untagged
@@ -141,14 +144,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!81 &1958448849
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1958448848}
-  m_Enabled: 1
 --- !u!20 &1958448850
 Camera:
   m_ObjectHideFlags: 0
@@ -222,32 +217,33 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1958448848}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3273cdb8db8d78b4e8deff476629bb63, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   shader: {fileID: 7200000, guid: de5614a7b018b3746bc8e8600113d472, type: 3}
-  img_real: 0.1
-  img_imag: 0.1
+  img_real: 0
+  img_imag: 0
   pixel_size: 0.003703703703703704
-  iterationsPerGroup: 128
+  power: 3.5
+  iterationsPerGroup: 64
   numGroups: 1
   gradient:
     serializedVersion: 2
     key0: {r: 0, g: 0, b: 0, a: 1}
-    key1: {r: 0, g: 0.12987041, b: 1, a: 1}
-    key2: {r: 0.74347425, g: 1, b: 0, a: 0}
-    key3: {r: 1, g: 1, b: 1, a: 0}
-    key4: {r: 0, g: 0, b: 0, a: 0}
+    key1: {r: 0.8263159, g: 0, b: 1, a: 1}
+    key2: {r: 0, g: 0, b: 1, a: 0}
+    key3: {r: 0.65397143, g: 1, b: 0, a: 0}
+    key4: {r: 1, g: 1, b: 1, a: 0}
     key5: {r: 0, g: 0, b: 0, a: 0}
     key6: {r: 0, g: 0, b: 0, a: 0}
     key7: {r: 0, g: 0, b: 0, a: 0}
     ctime0: 0
-    ctime1: 21843
-    ctime2: 43646
-    ctime3: 65535
-    ctime4: 0
+    ctime1: 15998
+    ctime2: 28142
+    ctime3: 43646
+    ctime4: 65535
     ctime5: 0
     ctime6: 0
     ctime7: 0
@@ -261,8 +257,174 @@ MonoBehaviour:
     atime7: 0
     m_Mode: 2
     m_ColorSpace: -1
-    m_NumColorKeys: 4
+    m_NumColorKeys: 5
     m_NumAlphaKeys: 2
+--- !u!114 &1958448853
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1958448848}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3273cdb8db8d78b4e8deff476629bb63, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  shader: {fileID: 7200000, guid: a5a2bd5a509bb0a4881e462e5063af00, type: 3}
+  img_real: 0
+  img_imag: 0
+  pixel_size: 0.003703703703703704
+  power: 2
+  iterationsPerGroup: 64
+  numGroups: 1
+  gradient:
+    serializedVersion: 2
+    key0: {r: 0, g: 0, b: 0, a: 1}
+    key1: {r: 0.8263159, g: 0, b: 1, a: 1}
+    key2: {r: 1, g: 0.8895351, b: 0, a: 0}
+    key3: {r: 1, g: 0.31879348, b: 0, a: 0}
+    key4: {r: 1, g: 1, b: 1, a: 0}
+    key5: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 15138
+    ctime2: 33151
+    ctime3: 53271
+    ctime4: 65535
+    ctime5: 0
+    ctime6: 0
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 2
+    m_ColorSpace: -1
+    m_NumColorKeys: 5
+    m_NumAlphaKeys: 2
+--- !u!114 &1958448854
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1958448848}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a65bd296e61521048a94dd75d7bdd740, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  shader: {fileID: 7200000, guid: f0ed275a3e041814488647313627fcb0, type: 3}
+  img_real: 0.2744
+  img_imag: 0.0057
+  shift_horizontal: 0
+  shift_verical: 0
+  pixel_size: 0.004319654427645789
+  power: 2
+  iterationsPerGroup: 64
+  numGroups: 1
+  gradient:
+    serializedVersion: 2
+    key0: {r: 0, g: 0, b: 0, a: 1}
+    key1: {r: 0, g: 0.50561476, b: 1, a: 1}
+    key2: {r: 0.083333254, g: 1, b: 0, a: 0}
+    key3: {r: 1, g: 0.90000004, b: 0, a: 0}
+    key4: {r: 1, g: 1, b: 1, a: 0}
+    key5: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 15998
+    ctime2: 35833
+    ctime3: 55571
+    ctime4: 65535
+    ctime5: 0
+    ctime6: 0
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 2
+    m_ColorSpace: -1
+    m_NumColorKeys: 5
+    m_NumAlphaKeys: 2
+--- !u!114 &1958448855
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1958448848}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1fed7c3ef10ad242a9997741552917a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  components:
+  - {fileID: 1958448853}
+  - {fileID: 1958448852}
+  - {fileID: 1958448854}
+  - {fileID: 1958448856}
+--- !u!114 &1958448856
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1958448848}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c3b5ff5e64c26f40b091cab3840bedb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  shader: {fileID: 7200000, guid: 5e01fccd686a74041ae57839e95de8ff, type: 3}
+  gradient:
+    serializedVersion: 2
+    key0: {r: 0, g: 0, b: 0, a: 1}
+    key1: {r: 0.5566038, g: 0.5295114, b: 0, a: 1}
+    key2: {r: 0.15193257, g: 0, b: 0.69411767, a: 0}
+    key3: {r: 0.22778267, g: 0.7735849, b: 0.1788003, a: 0}
+    key4: {r: 0.8584906, g: 0.2044504, b: 0.1579299, a: 0}
+    key5: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 1, g: 1, b: 1, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 6707
+    ctime2: 16480
+    ctime3: 26061
+    ctime4: 35450
+    ctime5: 49439
+    ctime6: 65535
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 2
+    m_ColorSpace: -1
+    m_NumColorKeys: 7
+    m_NumAlphaKeys: 2
+  useBasins: 0
+  img_real: 0
+  img_imag: 0
+  pixel_size: 0.004319654427645789
+  maxIterations: 64
+  epsilon: 0.0001
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
